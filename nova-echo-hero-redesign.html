@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOVA ECHO | Hero Redesign</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060714;
+      --bg-soft: #0d1022;
+      --cyan: #05e9ff;
+      --purple: #9258ff;
+      --pink: #ff3ed5;
+      --text: #f5f7ff;
+      --text-soft: #c9cde6;
+      --line: rgba(255, 255, 255, 0.15);
+      --glow: 0 0 32px rgba(5, 233, 255, 0.45);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Rajdhani", sans-serif;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, #121734 0%, #070914 55%, #04050d 100%);
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-inner {
+      text-align: center;
+    }
+
+    .loader-title {
+      font-family: "Orbitron", sans-serif;
+      letter-spacing: 0.25em;
+      font-size: clamp(18px, 3vw, 36px);
+      margin-bottom: 22px;
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(5, 233, 255, 0.6);
+    }
+
+    .loader-bar {
+      width: min(64vw, 340px);
+      height: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loader-bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+      box-shadow: 0 0 20px rgba(5, 233, 255, 0.8);
+      animation: load 1.8s ease forwards;
+    }
+
+    @keyframes load {
+      to { width: 100%; }
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .hero-video-wrap {
+      position: absolute;
+      inset: 0;
+      z-index: -3;
+    }
+
+    .hero-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(1.2) contrast(1.05) brightness(0.78);
+      transform: scale(1.02);
+    }
+
+    .video-fallback {
+      position: absolute;
+      inset: auto 20px 20px 20px;
+      z-index: 5;
+      display: none;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(4, 7, 18, 0.75);
+      backdrop-filter: blur(6px);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .video-fallback.show {
+      display: flex;
+    }
+
+    .video-fallback button {
+      border: 1px solid rgba(5, 233, 255, 0.8);
+      background: rgba(5, 233, 255, 0.12);
+      color: var(--text);
+      padding: 8px 12px;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .hero-shade {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 68% 38%, rgba(5, 233, 255, 0.24), transparent 38%),
+        radial-gradient(circle at 28% 76%, rgba(255, 62, 213, 0.22), transparent 34%),
+        linear-gradient(180deg, rgba(6, 7, 20, 0.32) 0%, rgba(6, 7, 20, 0.65) 55%, rgba(6, 7, 20, 0.9) 100%);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(5, 233, 255, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(5, 233, 255, 0.12) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.8) 30%, rgba(0, 0, 0, 1) 100%);
+      opacity: 0.28;
+      animation: drift 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes drift {
+      from { transform: translateY(0); }
+      to { transform: translateY(48px); }
+    }
+
+    .cursor-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(5, 233, 255, 0.18) 0%, rgba(146, 88, 255, 0.14) 36%, transparent 72%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.2s ease;
+      mix-blend-mode: screen;
+    }
+
+    .hero-inner {
+      min-height: 100vh;
+      width: min(1200px, 100% - 48px);
+      margin: 0 auto;
+      padding: 34px 0 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hero-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .logo {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(18px, 2.2vw, 24px);
+      letter-spacing: 0.18em;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .logo span { color: var(--cyan); }
+
+    .hero-nav {
+      display: flex;
+      gap: 16px;
+    }
+
+    .hero-nav a {
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding-bottom: 3px;
+      border-bottom: 1px solid transparent;
+      transition: color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .hero-nav a:hover {
+      color: var(--cyan);
+      border-color: rgba(5, 233, 255, 0.7);
+    }
+
+    .hero-main {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: clamp(20px, 4vw, 64px);
+      align-items: end;
+      margin-top: 40px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+    }
+
+    .hero-title {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(42px, 8vw, 106px);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      text-shadow: 0 0 16px rgba(146, 88, 255, 0.35);
+    }
+
+    .hero-title .grad {
+      background: linear-gradient(90deg, #ffffff 0%, #dce1ff 40%, #80eeff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      width: min(620px, 100%);
+      color: var(--text-soft);
+      font-size: clamp(17px, 2vw, 22px);
+      line-height: 1.52;
+      margin-bottom: 30px;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .btn {
+      position: relative;
+      border: 1px solid var(--line);
+      color: var(--text);
+      text-decoration: none;
+      padding: 14px 24px;
+      font-size: 14px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -130%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+      transition: left 0.55s ease;
+    }
+
+    .btn:hover::before { left: 130%; }
+
+    .btn-primary {
+      border-color: rgba(5, 233, 255, 0.85);
+      box-shadow: var(--glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      border-color: var(--cyan);
+    }
+
+    .btn-ghost:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 62, 213, 0.65);
+      box-shadow: 0 0 24px rgba(255, 62, 213, 0.35);
+    }
+
+    .hud-panel {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: linear-gradient(155deg, rgba(7, 12, 32, 0.8), rgba(5, 8, 22, 0.56));
+      backdrop-filter: blur(8px);
+      padding: 22px;
+      position: relative;
+    }
+
+    .hud-panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(5, 233, 255, 0.2);
+      pointer-events: none;
+      clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+    }
+
+    .hud-title {
+      font-family: "Orbitron", sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 14px;
+    }
+
+    .hud-list {
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .hud-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-soft);
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+      padding-bottom: 8px;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .hud-list li strong {
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .hero-bottom {
+      margin-top: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .signal {
+      color: var(--text-soft);
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .scroll-tip {
+      color: var(--text-soft);
+      font-size: 12px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .scroll-tip::after {
+      content: "";
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.5), transparent);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.35; transform: scaleX(0.7); }
+      50% { opacity: 1; transform: scaleX(1); }
+    }
+
+    .content {
+      background: linear-gradient(180deg, #070914 0%, #0c1022 100%);
+      padding: 80px 24px 110px;
+    }
+
+    .content-wrap {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(28px, 5vw, 54px);
+      margin-bottom: 12px;
+    }
+
+    .section-sub {
+      color: var(--text-soft);
+      max-width: 720px;
+      margin-bottom: 34px;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(11, 16, 38, 0.65);
+      padding: 24px;
+      transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+      will-change: transform;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(5, 233, 255, 0.58);
+      box-shadow: 0 16px 36px rgba(5, 233, 255, 0.2);
+    }
+
+    .card h3 {
+      font-family: "Orbitron", sans-serif;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      color: var(--text-soft);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .hero-main {
+        grid-template-columns: 1fr;
+      }
+      .hero-nav { display: none; }
+      .cards {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .hero-inner {
+        width: min(1200px, 100% - 28px);
+        padding-top: 24px;
+      }
+      .hero-title {
+        font-size: clamp(38px, 12vw, 62px);
+      }
+      .hero-desc {
+        font-size: 16px;
+      }
+      .cards {
+        grid-template-columns: 1fr;
+      }
+      .hero-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="loader" id="loader">
+    <div class="loader-inner">
+      <div class="loader-title">SYSTEM LINKING</div>
+      <div class="loader-bar"></div>
+    </div>
+  </div>
+
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <header class="hero" id="hero">
+    <div class="hero-video-wrap">
+      <video class="hero-video" autoplay muted loop playsinline preload="auto" id="heroVideo">
+        <source src="./4月30日(1)_15M_web.m4v" type="video/mp4">
+        <source src="./4月30日(1)_15M.mov" type="video/quicktime">
+      </video>
+      <div class="hero-shade"></div>
+      <div class="hero-grid"></div>
+      <div class="video-fallback" id="videoFallback">
+        <span>视频已在首屏加载；若未自动播放，请点击右侧按钮播放。</span>
+        <button id="playVideoBtn" type="button">播放视频</button>
+      </div>
+    </div>
+
+    <div class="hero-inner">
+      <div class="hero-topbar">
+        <a class="logo" href="#"><span>NOVA</span> ECHO</a>
+        <nav class="hero-nav">
+          <a href="#protocol">Protocol</a>
+          <a href="#experience">Experience</a>
+          <a href="#entry">Entry</a>
+        </nav>
+      </div>
+
+      <div class="hero-main">
+        <div>
+          <p class="eyebrow">Cyber Interface 2026</p>
+          <h1 class="hero-title"><span class="grad">Signal The Future</span></h1>
+          <p class="hero-desc">
+            以动态影像作为首屏主视觉，将城市霓虹与系统化信息层叠，打造可滚动、可探索、可交互的沉浸式开场体验。
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary magnetic" href="#entry">Launch Portal</a>
+            <a class="btn btn-ghost magnetic" href="#protocol">View Protocol</a>
+          </div>
+        </div>
+        <aside class="hud-panel">
+          <h2 class="hud-title">Realtime Feed</h2>
+          <ul class="hud-list">
+            <li>Mode <strong>Hero Capture</strong></li>
+            <li>Frame Sync <strong>60 FPS</strong></li>
+            <li>Signal <strong id="signalValue">92%</strong></li>
+            <li>Node <strong>Hangzhou Grid</strong></li>
+            <li>Status <strong>Online</strong></li>
+          </ul>
+        </aside>
+      </div>
+
+      <div class="hero-bottom">
+        <p class="signal">System Time · <span id="clock">--:--:--</span></p>
+        <p class="scroll-tip">Scroll to Explore</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="content" id="protocol">
+    <div class="content-wrap">
+      <h2 class="section-title reveal">交互方案概览</h2>
+      <p class="section-sub reveal">
+        参考目标网页的动态表达方式，这版在首屏强化了视频叠层、鼠标能量光圈、磁吸按钮、滚动揭示与信息 HUD，
+        同时将结构收敛成更清晰的产品化入口。
+      </p>
+      <section class="cards" id="experience">
+        <article class="card reveal">
+          <h3>视频主视觉</h3>
+          <p>使用本地 `4月30日(1)_15M.mov` 作为 Hero 背景，叠加氛围遮罩和网格扫描层，兼顾细节与可读性。</p>
+        </article>
+        <article class="card reveal">
+          <h3>鼠标交互层</h3>
+          <p>基于光圈跟随与按钮磁吸反馈，让用户在首屏就感受到“可操作”的实时系统界面。</p>
+        </article>
+        <article class="card reveal">
+          <h3>滚动叙事</h3>
+          <p>通过 reveal 动画进入正文内容，形成从情绪化视觉到信息化说明的自然过渡。</p>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const loader = document.getElementById("loader");
+    const heroVideo = document.getElementById("heroVideo");
+    const videoFallback = document.getElementById("videoFallback");
+    const playVideoBtn = document.getElementById("playVideoBtn");
+    const cursorGlow = document.getElementById("cursorGlow");
+    const clockEl = document.getElementById("clock");
+    const signalEl = document.getElementById("signalValue");
+    const revealEls = document.querySelectorAll(".reveal");
+
+    // Loading: hide when either video is ready or fallback timer completes.
+    let loaded = false;
+    const hideLoader = () => {
+      if (loaded) return;
+      loaded = true;
+      loader.classList.add("hidden");
+    };
+    heroVideo?.addEventListener("canplay", hideLoader, { once: true });
+    window.addEventListener("load", () => setTimeout(hideLoader, 1400), { once: true });
+
+    // Force first-screen visibility: try autoplay, then fall back to controls and manual play.
+    const ensureVideoVisible = async () => {
+      if (!heroVideo) return;
+      try {
+        await heroVideo.play();
+        if (videoFallback) videoFallback.classList.remove("show");
+      } catch (_err) {
+        heroVideo.controls = true;
+        if (videoFallback) videoFallback.classList.add("show");
+      }
+    };
+    window.addEventListener("load", ensureVideoVisible);
+    heroVideo?.addEventListener("error", () => {
+      heroVideo.controls = true;
+      if (videoFallback) videoFallback.classList.add("show");
+    });
+    playVideoBtn?.addEventListener("click", async () => {
+      try {
+        heroVideo.controls = true;
+        await heroVideo.play();
+        if (videoFallback) videoFallback.classList.remove("show");
+      } catch (_err) {
+        if (videoFallback) videoFallback.classList.add("show");
+      }
+    });
+
+    // Cursor glow interaction.
+    let gx = window.innerWidth / 2;
+    let gy = window.innerHeight / 2;
+    let tx = gx;
+    let ty = gy;
+    document.addEventListener("mousemove", (e) => {
+      tx = e.clientX;
+      ty = e.clientY;
+    });
+
+    const glowLoop = () => {
+      gx += (tx - gx) * 0.12;
+      gy += (ty - gy) * 0.12;
+      cursorGlow.style.transform = `translate(${gx - 130}px, ${gy - 130}px)`;
+      requestAnimationFrame(glowLoop);
+    };
+    glowLoop();
+
+    // Magnetic button effect.
+    document.querySelectorAll(".magnetic").forEach((btn) => {
+      btn.addEventListener("mousemove", (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - (rect.left + rect.width / 2);
+        const y = e.clientY - (rect.top + rect.height / 2);
+        btn.style.transform = `translate(${x * 0.12}px, ${y * 0.12}px)`;
+      });
+      btn.addEventListener("mouseleave", () => {
+        btn.style.transform = "translate(0, 0)";
+      });
+    });
+
+    // Scroll reveal.
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("in");
+        });
+      },
+      { threshold: 0.2 }
+    );
+    revealEls.forEach((el) => io.observe(el));
+
+    // Realtime clock + simulated signal.
+    const tick = () => {
+      const now = new Date();
+      clockEl.textContent = now.toTimeString().slice(0, 8);
+      signalEl.textContent = `${88 + Math.floor(Math.random() * 10)}%`;
+    };
+    tick();
+    setInterval(tick, 1000);
+
+    // Gentle hero parallax.
+    const hero = document.getElementById("hero");
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY * 0.2;
+      hero.style.backgroundPosition = `center ${y}px`;
+    }, { passive: true });
+  </script>
+</body>
+</html>
